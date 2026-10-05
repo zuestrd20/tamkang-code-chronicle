@@ -15,12 +15,12 @@ const numeric=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=m
 
 export class Engine {
  constructor(options={}) {
-  this.listeners=new Set(); this.options=options; this.state=this._initial(); this._refreshQuests();
+  this.listeners=new Set(); this.options=options; this.lastSaveResult=null; this.state=this._initial(); this._refreshQuests();
  }
  _character(id,level=1){const base=CHARACTERS[id];const growth=level-1;return {...copy(base),level,maxHp:base.maxHp+growth*20,maxMp:base.maxMp+growth*6,atk:base.atk+growth*4,def:base.def+growth*2,hp:base.maxHp+growth*20,mp:base.maxMp+growth*6,shield:0,guarding:false,buff:0};}
  _initial(){return {version:GAME_VERSION,mode:'title',chapter:0,regionId:'campus',player:{...REGIONS.campus.spawn,facing:'down'},party:[this._character('jiang'),this._character('su')],inventory:{tea:4,battery:3,revive:2,rice:1},gold:70,level:1,xp:0,xpNext:45,relationships:{su:0,shen:0},flags:{},quests:[],dialogue:null,battle:null,ending:null,steps:0,battlesWon:0,revision:0};}
  subscribe(listener){this.listeners.add(listener);return ()=>this.listeners.delete(listener);}
- _emit(){this._refreshQuests();this.state.revision++;for(const listener of this.listeners)listener(this.state);if(this.options.autoSave!==false&&this.state.mode!=='title'){try{if(typeof localStorage!=='undefined')this.save(localStorage);}catch{}}}
+ _emit(){this._refreshQuests();this.state.revision++;for(const listener of this.listeners)listener(this.state);if(this.options.autoSave!==false&&this.state.mode!=='title'){this.lastSaveResult=this.save();}}
  _ok(message,extra={}){return {ok:true,message,...extra};}
  _no(message){return {ok:false,message};}
  _refreshQuests(){this.state.quests=QUESTS.map(q=>({...q,status:this.state.flags[q.flag]?'done':(!q.requires||this.state.flags[q.requires])?'active':'locked'}));}
@@ -88,7 +88,47 @@ export class Engine {
  retreat(){const result=this.fleeBattle();if(!result.ok)return result;const rest=this.getRegion().targets.find(t=>t.kind==='rest');if(rest)this.navigate(rest.id);return this._ok('已撤回安全休息點。與休息點互動即可免費恢復全隊。');}
  getEnding(){const high=this.state.relationships.su>=5&&this.state.relationships.shen>=4;return {title:this.state.ending==='open'?'留白的明天':'與你同行',subtitle:high?'真心相繫・海風裡的約定':'潮汐平息・新的起點',text:this.state.ending==='open'?'他們替每一份未完成保留了位置。程式最後的留白，成為大家重新出發的地方。':'從此，每一次重要的改變，都會先等到大家點頭。三個人的故事，在海風裡繼續編寫。',epilogue:high?'映禾把晚餐後的看海行程，設成沒有截止日的約定。以澄第一次關掉備份提醒，笑著說：「明天再做也來得及。」':'映禾把新的介面畫在餐巾紙上，以澄替它取名為「明天」。彥廷合上電腦，決定先把眼前的夜色記住。',relationships:copy(this.state.relationships),battlesWon:this.state.battlesWon,level:this.state.level,steps:this.state.steps};}
  exportSave(){return JSON.stringify({version:GAME_VERSION,savedAt:new Date().toISOString(),state:this.state});}
- _validateSave(payload){if(!payload||payload.version!==GAME_VERSION||!payload.state)throw new Error('存檔版本不相容。');const s=payload.state;if(s.version!==GAME_VERSION||!MODES.includes(s.mode)||s.mode==='title'||!REGIONS[s.regionId]||!Number.isInteger(s.chapter)||s.chapter<0||s.chapter>4)throw new Error('存檔內容不完整。');if(!s.player||!Number.isInteger(s.player.x)||!Number.isInteger(s.player.y)||s.player.x<0||s.player.x>=15||s.player.y<0||s.player.y>=11)throw new Error('存檔位置無效。');if(!Number.isInteger(s.level)||s.level<1||s.level>8||!numeric(s.gold,0,1000000)||!numeric(s.xp,0,100000)||!numeric(s.xpNext,1,100000))throw new Error('存檔成長資料無效。');if(!Array.isArray(s.party)||s.party.length<2||s.party.length>3||new Set(s.party.map(p=>p.id)).size!==s.party.length||!s.party.some(p=>p.id==='jiang')||!s.party.some(p=>p.id==='su'))throw new Error('存檔隊伍資料無效。');for(const p of s.party)if(!CHARACTERS[p.id]||!numeric(p.maxHp,1,10000)||!numeric(p.hp,0,p.maxHp)||!numeric(p.maxMp,1,10000)||!numeric(p.mp,0,p.maxMp)||!numeric(p.atk,1,10000)||!numeric(p.def,0,10000)||!Array.isArray(p.skills)||p.skills.some(k=>!CHARACTERS[p.id].skills.includes(k))||!numeric(p.shield,0,10000))throw new Error('存檔角色資料無效。');if(!s.inventory||Object.keys(ITEMS).some(k=>!Number.isInteger(s.inventory[k])||s.inventory[k]<0||s.inventory[k]>99999))throw new Error('存檔物品資料無效。');if(!s.flags||Object.values(s.flags).some(v=>typeof v!=='boolean')||!s.relationships||!numeric(s.relationships.su,0,10)||!numeric(s.relationships.shen,0,10))throw new Error('存檔故事資料無效。');if(REGIONS[s.regionId].unlockFlag&&!s.flags[REGIONS[s.regionId].unlockFlag])throw new Error('存檔區域尚未開啟。');if(s.mode==='dialogue'){const d=s.dialogue;if(!d||!SCENES[d.sceneId]||!Array.isArray(d.nodes)||!Number.isInteger(d.index)||!d.nodes[d.index]||typeof d.nodes[d.index].text!=='string')throw new Error('存檔對話資料無效。');}if(['combat','victory','defeat'].includes(s.mode)){const b=s.battle;if(!b||!ENCOUNTERS[b.id]||!Array.isArray(b.enemies)||b.enemies.length!==ENCOUNTERS[b.id].enemyIds.length||!Number.isInteger(b.round)||b.round<1||!Array.isArray(b.log)||!b.retry||!Array.isArray(b.retry.party)||!b.retry.inventory)throw new Error('存檔戰鬥資料無效。');for(let i=0;i<b.enemies.length;i++){const e=b.enemies[i];if(e.id!==ENCOUNTERS[b.id].enemyIds[i]||!numeric(e.hp,0,ENEMIES[e.id].maxHp)||!e.intent||!Array.isArray(e.pattern))throw new Error('存檔敵人資料無效。');}if(s.mode==='combat'&&(!s.party.some(p=>p.id===b.currentActorId&&p.hp>0)||!Array.isArray(b.turnOrder)||!Number.isInteger(b.turnIndex)||b.turnOrder[b.turnIndex]!==b.currentActorId))throw new Error('存檔回合資料無效。');}return s;}
+ _validateSave(payload){
+  const record=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  const whole=(n,min,max)=>Number.isInteger(n)&&numeric(n,min,max);
+  const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+  const fail=message=>{throw new Error(message);};
+  if(!record(payload)||payload.version!==GAME_VERSION||!record(payload.state))fail('存檔版本不相容。');
+  const s=payload.state;
+  if(s.version!==GAME_VERSION||!MODES.includes(s.mode)||s.mode==='title'||!REGIONS[s.regionId]||!whole(s.chapter,0,4))fail('存檔內容不完整。');
+  const region=REGIONS[s.regionId];
+  if(!record(s.player)||!whole(s.player.x,0,14)||!whole(s.player.y,0,10)||!['up','down','left','right'].includes(s.player.facing)||['#','T','~'].includes(region.map[s.player.y][s.player.x])||region.targets.some(t=>t.x===s.player.x&&t.y===s.player.y))fail('存檔位置無效。');
+  if(!whole(s.level,1,8)||!whole(s.gold,0,1000000)||!whole(s.xp,0,100000)||s.xpNext!==45+35*(s.level-1)||!whole(s.steps,0,10000000)||!whole(s.battlesWon,0,100)||!whole(s.revision,0,10000000))fail('存檔成長資料無效。');
+  const validateParty=(party,label,level=s.level)=>{
+   if(!Array.isArray(party)||party.length<2||party.length>3||party.some(p=>!record(p))||new Set(party.map(p=>p.id)).size!==party.length||!party.some(p=>p.id==='jiang')||!party.some(p=>p.id==='su'))fail(label);
+   for(const p of party){const expected=CHARACTERS[p.id]?this._character(p.id,level):null;if(!whole(level,1,8)||!expected||p.level!==level||p.maxHp!==expected.maxHp||p.maxMp!==expected.maxMp||p.atk!==expected.atk||p.def!==expected.def||!whole(p.hp,0,p.maxHp)||!whole(p.mp,0,p.maxMp)||!whole(p.shield,0,66)||!whole(p.buff,0,1)||typeof p.guarding!=='boolean'||!same(p.skills,expected.skills)||typeof p.name!=='string'||typeof p.shortName!=='string')fail(label);}
+  };
+  const validateInventory=(inventory,label)=>{if(!record(inventory)||Object.keys(inventory).length!==Object.keys(ITEMS).length||Object.keys(ITEMS).some(k=>!whole(inventory[k],0,99999)))fail(label);};
+  validateParty(s.party,'存檔角色資料無效。');validateInventory(s.inventory,'存檔物品資料無效。');
+  const allowedFlags=new Set(['intro','assigned','noticeRead','postcardRead','suTalkRead','metShen','checksumSolved','bookRead','memoryRead','shenTalkRead','promisedSea','finished',...Object.values(ENCOUNTERS).map(e=>e.flag)]);
+  if(!record(s.flags)||Object.entries(s.flags).some(([k,v])=>!allowedFlags.has(k)||typeof v!=='boolean')||!record(s.relationships)||!whole(s.relationships.su,0,10)||!whole(s.relationships.shen,0,10)||![null,'together','open'].includes(s.ending))fail('存檔故事資料無效。');
+  if(region.unlockFlag&&!s.flags[region.unlockFlag])fail('存檔區域尚未開啟。');
+  if(s.mode==='ending'&&(!s.flags.finished||!s.flags.compilerCleared||s.chapter!==4||!s.ending))fail('存檔結局資料無效。');
+  if(s.mode==='dialogue'){
+   const d=s.dialogue,source=record(d)?SCENES[d.sceneId]:null;
+   if(!source||!Array.isArray(d.nodes)||d.nodes.length!==source.length||!whole(d.index,0,source.length-1)||!same(d.onComplete,SCENE_COMPLETIONS[d.sceneId]??{}))fail('存檔對話資料無效。');
+   for(let i=0;i<source.length;i++){const node=d.nodes[i],original=source[i];const valid=same(node,original)||(original.choices??[]).some(c=>same(node,{speaker:'旁白',text:c.response}));if(!valid)fail('存檔對話內容無效。');}
+  }else if(s.dialogue!==null)fail('存檔對話狀態不一致。');
+  if(['combat','victory','defeat'].includes(s.mode)){
+   const b=s.battle,enc=record(b)?ENCOUNTERS[b.id]:null;
+   if(!enc||!Array.isArray(b.enemies)||b.enemies.length!==enc.enemyIds.length||!whole(b.round,1,100000)||!Array.isArray(b.log)||b.log.length>100||b.log.some(l=>typeof l!=='string')||!record(b.retry)||!Array.isArray(b.turnOrder)||new Set(b.turnOrder).size!==b.turnOrder.length||b.turnOrder.some(id=>!s.party.some(p=>p.id===id))||!whole(b.turnIndex,0,s.party.length)||typeof b.name!=='string')fail('存檔戰鬥資料無效。');
+   validateParty(b.retry.party,'存檔重試隊伍無效。',s.mode==='victory'?s.level-(b.reward?.levelUp??0):s.level);validateInventory(b.retry.inventory,'存檔重試物品無效。');
+   if(!whole(b.retry.gold,0,1000000)||!same(b.retry.party.map(p=>p.id),s.party.map(p=>p.id)))fail('存檔重試資料無效。');
+   for(let i=0;i<b.enemies.length;i++){
+    const e=b.enemies[i],base=ENEMIES[enc.enemyIds[i]];
+    if(!record(e)||e.id!==base.id||e.maxHp!==base.maxHp||e.atk!==base.atk||e.def!==base.def||!same(e.pattern,base.pattern)||!whole(e.hp,0,base.maxHp)||!whole(e.shield,0,48)||!whole(e.weakened,0,1)||typeof e.overloaded!=='boolean'||typeof e.name!=='string'||typeof e.intentText!=='string'||!record(e.intent)||!['attack','charge','heavy','sweep','shield','down'].includes(e.intent.kind)||typeof e.intent.label!=='string'||typeof e.intent.description!=='string'||!Array.isArray(e.intent.targetIds)||e.intent.targetIds.some(id=>!s.party.some(p=>p.id===id))||!e.intent.targetIds.length&&['attack','heavy','sweep'].includes(e.intent.kind))fail('存檔敵人資料無效。');
+   }
+   if(s.mode==='combat'&&(!s.party.some(p=>p.id===b.currentActorId&&p.hp>0)||b.turnOrder[b.turnIndex]!==b.currentActorId||!b.enemies.some(e=>e.hp>0)))fail('存檔回合資料無效。');
+   if(s.mode==='defeat'&&(s.party.some(p=>p.hp>0)||b.currentActorId!==null))fail('存檔戰敗資料無效。');
+   if(s.mode==='victory'&&(!b.enemies.every(e=>e.hp===0)||!record(b.reward)||b.reward.xp!==enc.xp||b.reward.gold!==enc.gold))fail('存檔勝利資料無效。');
+  }else if(s.battle!==null)fail('存檔戰鬥狀態不一致。');
+  return s;
+ }
  importSave(json){try{if(typeof json!=='string'||json.length>3000000)return this._no('存檔格式無效。');const payload=JSON.parse(json);const next=copy(this._validateSave(payload));this.state=next;if(next.mode==='dialogue')this._setDialogueNode();this._emit();return this._ok('進度已讀取。');}catch(error){return this._no(`無法讀取存檔：${error.message}`);}}
  save(storage){try{const target=storage??globalThis.localStorage;if(!target||typeof target.setItem!=='function')return this._no('這個環境不支援本機儲存。');if(this.state.mode==='title')return this._no('開始旅程後才能存檔。');target.setItem(SAVE_KEY,this.exportSave());return this._ok('進度已儲存在此裝置。');}catch{return this._no('儲存失敗，可能是瀏覽器封鎖儲存或空間不足。');}}
  load(storage){try{const target=storage??globalThis.localStorage;const raw=target?.getItem(SAVE_KEY);if(!raw)return this._no('這個裝置尚無存檔。');return this.importSave(raw);}catch{return this._no('無法存取這個裝置的存檔。');}}
