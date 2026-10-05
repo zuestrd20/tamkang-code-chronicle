@@ -35,10 +35,10 @@ export const ITEMS = {
 export const ENEMIES = {
  loop:{id:'loop',name:'迴圈小怪',icon:'∞',maxHp:115,atk:17,def:3,pattern:['attack','charge','heavy'],color:'#73d4bf',description:'一段找不到出口的重複。蓄力後會猛烈撞擊。'},
  index:{id:'index',name:'索引守衛',icon:'冊',maxHp:210,atk:22,def:7,pattern:['attack','shield','charge','heavy'],color:'#c3a8e8',description:'守著失去索引的書頁。護盾之後會準備重擊。'},
- raceA:{id:'raceA',name:'競態・赤影',icon:'赤',maxHp:145,atk:23,def:5,pattern:['attack','charge','sweep'],color:'#f5a287',description:'與另一道影子爭奪同一段記憶。'},
- raceB:{id:'raceB',name:'競態・青影',icon:'青',maxHp:145,atk:21,def:6,pattern:['shield','attack','heavy'],color:'#8dc6e8',description:'先建立防線，再趁隙進攻。'},
- beast:{id:'beast',name:'崩解演算獸',icon:'裂',maxHp:365,atk:27,def:8,pattern:['sweep','charge','heavy','attack'],color:'#e0b080',description:'過載運算凝成的巨獸。全體攻擊後會蓄力。'},
- compiler:{id:'compiler',name:'失序編譯者',icon:'寂',maxHp:620,atk:31,def:10,pattern:['attack','charge','sweep','shield','heavy'],color:'#ceb3ee',description:'想抹去錯誤，也差點抹去所有不完美的人。生命低於一半時進入過載。'}
+ raceA:{id:'raceA',name:'競態・赤影',icon:'赤',maxHp:160,atk:33,def:5,pattern:['attack','charge','sweep'],color:'#f5a287',description:'與另一道影子爭奪同一段記憶。'},
+ raceB:{id:'raceB',name:'競態・青影',icon:'青',maxHp:160,atk:31,def:6,pattern:['shield','attack','heavy'],color:'#8dc6e8',description:'先建立防線，再趁隙進攻。'},
+ beast:{id:'beast',name:'崩解演算獸',icon:'裂',maxHp:410,atk:43,def:8,pattern:['sweep','charge','heavy','attack'],color:'#e0b080',description:'過載運算凝成的巨獸。全體攻擊後會蓄力。'},
+ compiler:{id:'compiler',name:'失序編譯者',icon:'寂',maxHp:720,atk:58,def:10,pattern:['attack','charge','sweep','shield','heavy'],color:'#ceb3ee',description:'想抹去錯誤，也差點抹去所有不完美的人。生命低於一半時進入過載。'}
 };
 export const ENCOUNTERS = {
  loop:{id:'loop',name:'第一個斷點',enemyIds:['loop'],xp:50,gold:40,flag:'loopCleared',afterScene:'afterLoop'},
@@ -50,13 +50,13 @@ export const ENCOUNTERS = {
 const target=(id,name,x,y,icon,kind='npc',extra={})=>({id,name,x,y,icon,kind,...extra});
 export const REGIONS = {
  campus:{id:'campus',name:'校園廣場',title:'風起・校園廣場',subtitle:'鐘聲穿過榕蔭，海風正好。',theme:'campus',unlockFlag:null,spawn:{x:7,y:8},map:[
- 'TTTTTTTTTTTTTTT','T.............T','T...TT...TT...T','T.............T','T..TT.....TT..T','T......=......T','T..TT..=..TT..T','T......=......T','T.............T','T.............T','TTTTTTTTTTTTTTT'],targets:[
+ 'TTTTTTTTTTTTTTT','T.............T','T...TT...TT...T','T.............T','T..TT.....T...T','T......=......T','T..TT..=..TT..T','T......=......T','T.............T','T.............T','TTTTTTTTTTTTTTT'],targets:[
  target('mentor','許老師',7,3,'師'),target('notice','風之告示板',3,2,'告','object'),target('console','失控終端',11,4,'碼','battle'),target('snack','熱茶小攤',3,8,'茶','rest'),target('suTalk','林映禾',5,6,'禾'),target('campusEcho','長椅上的明信片',12,2,'信','object'),target('toLibrary','前往圖書館',12,8,'門','travel',{destination:'library'})]},
  library:{id:'library',name:'數位圖書館',title:'藏光・數位圖書館',subtitle:'有人替未說出口的話，留了一頁空白。',theme:'library',unlockFlag:'loopCleared',spawn:{x:2,y:8},map:[
  '###############','#.............#','#.##.##.##.##.#','#.............#','#.##.##.##.##.#','#.............#','#.##.##.##.##.#','#.............#','#.............#','#.............#','###############'],targets:[
  target('librarian','周以澄',7,3,'澄'),target('archive','校驗書架',3,5,'冊','puzzle'),target('sentinel','索引中樞',11,5,'印','battle'),target('book','未寄出的註解',1,3,'頁','object'),target('libraryRest','窗邊休息席',7,8,'息','rest'),target('toCampus','返回校園',1,8,'門','travel',{destination:'campus'}),target('toServer','進入運算核心',12,8,'門','travel',{destination:'server'})]},
  server:{id:'server',name:'運算核心',title:'潮汐・運算核心',subtitle:'機房深處，像有一片海正在呼吸。',theme:'server',unlockFlag:'indexCleared',spawn:{x:2,y:8},map:[
- '###############','#.............#','#.##...#...##.#','#......#......#','#.##.......##.#','#.............#','#.##...#...##.#','#......#......#','#.............#','#.............#','###############'],targets:[
+ '###############','#.............#','#.##...#....#.#','#......#......#','#.##.......##.#','#.............#','#.##...#....#.#','#......#......#','#.............#','#.............#','###############'],targets:[
  target('race','競態雙影',4,3,'雙','battle'),target('beast','過載閘門',10,5,'裂','battle'),target('core','潮汐之心',11,2,'心','battle'),target('memory','舊版提交紀錄',2,5,'憶','object'),target('shenTalk','周以澄',9,8,'澄'),target('serverRest','備援修復站',5,8,'癒','rest'),target('toLibraryBack','返回圖書館',1,8,'門','travel',{destination:'library'})]}
 };
 export const QUESTS = [
