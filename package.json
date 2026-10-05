@@ -1,0 +1,1 @@
+{"name":"tamkang-code-chronicle","version":"1.0.0","private":true,"type":"module","description":"Original Traditional Chinese campus story RPG","scripts":{"test":"node tests-engine.mjs","serve":"python3 -m http.server 8080"}}

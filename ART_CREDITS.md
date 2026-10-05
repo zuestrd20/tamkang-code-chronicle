@@ -1,0 +1,43 @@
+# Artwork provenance
+
+Created 2026-10-05 for 暮光編譯 / Tamkang Code Chronicle.
+
+All five raster assets are original AI-generated images produced with OpenAI's built-in image_gen tool. No stock artwork, official Tamkang logos, existing game artwork, named-artist style references, or externally downloaded illustrations were used. The campus geography is fictional, loosely inspired by a leafy hillside university in Taiwan. All three depicted students are fictional adults in their early twenties.
+
+## Production files
+
+- assets/hero-background.webp — 1672 × 941, panoramic title artwork. Left side provides title space; trio on right.
+- assets/battle-background.webp — 1672 × 941, signal fracture in a conservatory/library with clear arena floor.
+- assets/portrait-yan.webp — 640 × 640, 姜彥廷.
+- assets/portrait-ying.webp — 640 × 640, 林映禾.
+- assets/portrait-cheng.webp — 640 × 640, 周以澄.
+
+The images were visually inspected. ImageMagick was used only for web-ready WebP encoding and portrait downscaling; no compositing or artistic image edits were done outside image_gen. Portraits use the generated hero artwork as an identity/style reference. Game text and interface are rendered separately in HTML/CSS.
+
+## Final generation prompts
+
+### Hero cover
+
+Use case: illustration-story. Asset type: premium story-driven RPG website cover background, panoramic landscape 16:9. Create an original gorgeously polished anime-inspired painterly campus fantasy illustration with subtle pixel-art-like crisp light details, no imitation of any existing franchise or named artist.
+Scene: a fictional hillside Taiwanese university at twilight, inspired by the mood of Tamkang without reproducing exact architecture, glowing library windows, elegant red brick academic building, leafy banyan and palms, rain-polished stone courtyard, a distant sliver of blue estuary. Warm apricot sunset gives way to deep navy blue and jade foliage. Small cyan fragments of code-like magical light drift from a distant clock arch, conveying campus mystery and gentle adventure.
+Composition is essential: wide cinematic shot. Leave the left 46 percent atmospheric and mostly open, with dark blue paving, receding courtyard and sparse trees suitable for an overlaid game title and buttons. Group exactly THREE fictional adult university students in their early twenties across the right 50 percent, shown from roughly knee height up, all faces clear and attractive in individually expressive anime portrait quality. None should be cut off by the frame. Hero in the center-right: male adult 姜彥廷, short slightly tousled black hair, warm brown eyes, navy casual jacket over a light shirt, amber yellow backpack with visible straps, thoughtful resolute expression, holding a softly glowing blue device at waist. To his left nearer the center is adult woman 林映禾, short dark bob, thin round glasses, teal green jacket, observant confident expression, holding a small closed notebook. At the far right is adult man 周以澄, swept auburn hair, warm terracotta hoodie, easy playful smile. They are clearly FRIENDS beginning an adventure; relaxed dynamic postures and natural hands.
+Art direction: sophisticated editorial illustration, hand-painted architectural depth, confident clean face linework, radiant rim lighting, cinematic atmospheric perspective, intricate foliage and scattered amber leaves, subtle luminous geometric signal crack in sky. This is the final game artwork, not a mockup, poster, user interface or collage. No text of any kind, no labels, logos, watermarks, school crests, borders or buttons. Entire image fully illustrated.
+
+### Battle background
+
+Use case: illustration-story. Asset type: a wide landscape 16:9 battle background for an original traditional Chinese campus mystery RPG. Create a polished anime-inspired painterly original environment illustration, crisp details, hand-painted depth with luminous pixel-like light fragments. No people, no monsters, no interface and no text.
+Scene: the interior of an abandoned yet beautiful university botanical conservatory connected to an old library, at blue-hour twilight. Tall elegant greenhouse glass walls and a ribbed dome stretch overhead, thick verdant ferns and tropical plants flank the sides, red brick piers and overflowing wooden bookshelves are visible between vines. Rain beads glint on glass, old library books and loose papers hover at the edges. A dramatic vertical jagged rift of aquamarine code-like light floats in the rear center, with floating translucent geometric squares and amber fireflies circling its fractured edges. Through the glass is a dark Taiwanese campus hillside, deep navy sky and a last sliver of orange sunset.
+Composition: cinematic wide perspective, a large central open circular stone courtyard floor takes up the entire bottom 45 percent and provides a clean gameplay arena, no central obstacles, floor wet and reflective. Detailed framing architecture and plants on far left and right, luminous rift at center back. Allow room for game characters and battle overlay. Mysterious and beautiful, high-stakes magical climax without horror. Teal and indigo palette with carefully placed warm amber light, subtle pink glints. Sophisticated game concept-art lighting and excellent architectural rendering. Original art, no named artist imitation, no famous franchise resemblance, no words, no letters, no numerals, no logos, no watermark, no border.
+
+### 姜彥廷 portrait
+
+Use case: identity-preserve. Asset type: square illustrated portrait for a premium original anime-inspired campus mystery RPG. The attached image is the character design and style reference. Make a NEW square chest-up portrait of ONLY the specified adult character, matching their exact face, hair, clothing and painterly anime art style. Beautiful clean expressive face linework, soft warm amber rim lighting, dark indigo/teal campus at dusk bokeh background with subtle cyan magical particles. The person is centered, with their full head and hair inside the image with comfortable margin, face upper center and shoulders visible. Consistent luxurious game character art. Not a photo, not a UI, not pixel art. No text, no logos, no borders, no watermarks. The specified character is the adult man near the center-right of the reference: 姜彥廷, short slightly tousled black hair, warm brown eyes, navy casual jacket over white/light shirt, amber yellow backpack straps. Thoughtful yet quietly determined, looking directly at viewer, slight friendly smile. Keep him visually in his early twenties.
+
+### 林映禾 portrait
+
+Use case: identity-preserve. Asset type: square illustrated portrait for a premium original anime-inspired campus mystery RPG. The attached image is the character design and style reference. Make a NEW square chest-up portrait of ONLY the specified adult character, matching their exact face, hair, clothing and painterly anime art style. Beautiful clean expressive face linework, soft warm amber rim lighting, dark indigo/teal campus at dusk bokeh background with subtle cyan magical particles. The person is centered, with their full head and hair inside the image with comfortable margin, face upper center and shoulders visible. Consistent luxurious game character art. Not a photo, not a UI, not pixel art. No text, no logos, no borders, no watermarks. The specified character is the adult woman near the middle of the reference: 林映禾, short dark chin-length bob hair, thin round dark glasses, brown eyes, teal green jacket over light shirt. Intelligent and confident with a friendly slightly knowing smile, looking directly at viewer. Keep her visually in her early twenties.
+
+### 周以澄 portrait
+
+Use case: identity-preserve. Asset type: square illustrated portrait for a premium original anime-inspired campus mystery RPG. The attached image is the character design and style reference. Make a NEW square chest-up portrait of ONLY the specified adult character, matching their exact face, hair, clothing and painterly anime art style. Beautiful clean expressive face linework, soft warm amber rim lighting, dark indigo/teal campus at dusk bokeh background with subtle cyan magical particles. The person is centered, with their full head and hair inside the image with comfortable margin, face upper center and shoulders visible. Consistent luxurious game character art. Not a photo, not a UI, not pixel art. No text, no logos, no borders, no watermarks. The specified character is the adult man on the far right of the reference: 周以澄, auburn hair swept casually upward, warm brown eyes, warm terracotta zip hoodie over white/light shirt, backpack straps. Relaxed expressive playful smile, looking directly at viewer. Keep him visually in his early twenties.
+
