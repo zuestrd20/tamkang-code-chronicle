@@ -22,7 +22,27 @@ function icon(name){return `<svg class="ui-icon" width="20" height="20" viewBox=
 function toast(s){if(!s)return;const e=document.querySelector('#toast');e.textContent=s;e.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove('show'),3000)}
 function safeStorage(){try{return localStorage}catch{return null}}
 function hasSave(){try{return !!safeStorage()?.getItem(SAVE_KEY)}catch{return false}}
-function perform(fn,{quiet=false}={}){try{const oldMode=game.state.mode;const r=fn();if(r?.ok===false||(!quiet&&r?.message))toast(r.message);if(game.lastSaveResult?.ok===false&&!saveWarningShown){toast('自動存檔失敗。請保留此分頁，或檢查瀏覽器儲存設定。');saveWarningShown=true}if(oldMode==='combat'&&game.state.mode==='victory')sound.effect('win');else if(!quiet)sound.effect(oldMode==='combat'?'attack':'select');selection=null;render();return r}catch(err){console.error(err);toast('操作未完成，請再試一次。既有存檔不受影響。');render()}}
+function perform(fn,{quiet=false}={}){
+ try{
+  const oldMode=game.state.mode,oldRegion=game.state.regionId;
+  const r=fn();
+  if(r?.ok===false||(!quiet&&r?.message))toast(r.message);
+  if(game.lastSaveResult?.ok===false&&!saveWarningShown){toast('自動存檔失敗。請保留此分頁，或檢查瀏覽器儲存設定。');saveWarningShown=true}
+  if(oldMode==='combat'&&game.state.mode==='victory')sound.effect('win');
+  else if(!quiet)sound.effect(oldMode==='combat'?'attack':'select');
+  selection=null;render();
+  // Destination buttons can sit below the scene on a phone. Bring only a new
+  // scene or game mode into view; ordinary movement and turns keep their place.
+  const s=game.state;
+  if((oldMode!==s.mode||oldRegion!==s.regionId)&&window.matchMedia?.('(max-width: 700px)')?.matches){
+   const selector=s.mode==='dialogue'?'.dialogue-box':s.mode==='combat'?'.battle-actions':s.mode==='explore'?'.scene-top':s.mode==='ending'?'.ending':'.stage';
+   const block=s.mode==='dialogue'?'center':s.mode==='combat'?'end':'start';
+   const behavior=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth';
+   document.querySelector(selector)?.scrollIntoView?.({behavior,block});
+  }
+  return r;
+ }catch(err){console.error(err);toast('操作未完成，請再試一次。既有存檔不受影響。');render()}
+}
 function bar(value,max,mp=false){return `<div class="bar ${mp?'mp':''}"><span style="width:${Math.max(0,Math.min(100,value/Math.max(1,max)*100))}%"></span></div>`}
 function partyCard(p){return `<div class="party-card ${p.hp<=0?'is-fallen':''}"><div class="portrait"><img src="assets/${portraits[p.id]}" alt="${esc(p.name)}" onerror="this.style.display='none'"></div><div class="party-info"><div class="party-name"><span>${esc(p.name)}</span><small>LV. ${p.level||game.state.level||1}</small></div><div class="party-meter"><span class="meter-label">HP</span>${bar(p.hp,p.maxHp)}<span>${p.hp}<small>/${p.maxHp}</small></span></div><div class="party-meter"><span class="meter-label">MP</span>${bar(p.mp,p.maxMp,true)}<span>${p.mp}<small>/${p.maxMp}</small></span></div></div></div>`}
 function toolbar(){return `<div class="toolbar"><button class="small ghost sound-toggle" data-action="sound" aria-label="${sound.on?'關閉音樂':'開啟音樂'}">${icon('music')}<span>${sound.on?'音樂開':'音樂關'}</span></button><span class="toolbar-divider" aria-hidden="true"></span><button class="small ghost" data-action="save">存檔</button><button class="small ghost" data-action="load">讀檔</button><button class="small ghost" data-action="help">指南</button><button class="small ghost menu-toggle" data-action="pause" aria-label="開啟旅途選單"><span aria-hidden="true">☰</span><span>選單</span></button></div>`}
