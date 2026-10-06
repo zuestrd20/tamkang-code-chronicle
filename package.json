@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Original Traditional Chinese campus story RPG",
   "scripts": {
-    "test": "node tests-engine.mjs && node tests-extra.mjs",
+    "test": "node tests-engine.mjs && node tests-extra.mjs && node tests-map.mjs",
     "serve": "python3 -m http.server 8080"
   }
 }

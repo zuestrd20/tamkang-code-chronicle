@@ -91,3 +91,11 @@
 - 本機存檔依賴瀏覽器儲存設定，無跨裝置同步；清除網站資料會刪除進度。
 - 瀏覽器中實際確認重玩會覆寫已完成存檔，該步驟受執行權限限制而未執行；已驗證取消，確認後重開的流程由隔離 UI 測試涵蓋。
 - 自動化分支測試與實際瀏覽器路線是不同層次的證據，不將 64 種自動化路線宣稱為 64 次真人通關。
+
+## 2026-10-06 visual redesign
+
+- Replaced the square-tile / block-sprite exploration renderer with a deterministic, high-resolution illustrated scene for all three maps. Intrinsic canvas is 1440 × 898; the unchanged 15 × 11 logical interaction grid is mapped proportionally in both axes.
+- Labels now appear next to nearby interactions; every destination remains named in the accessible button list.
+- Story, engine, saved-game schema, collision cells and target coordinates are unchanged.
+- `npm test`: existing 11 engine groups + 52 extended groups, plus 4 renderer checks. Renderer checks cover deterministic output and no mutation of region/game state in all three maps.
+- Local headless Chromium could not launch because this executor disallows its required socket. The cloud browser cannot open localhost. Public Pages visual verification is therefore performed after authorized publication rather than claimed as a local-browser pass.
